@@ -7,6 +7,19 @@ import java.util.*;
 
 public class MyJSONParser {
 
+    /**
+     * Возвращает новую позицию, с которой продолжится поиск и объект
+     */
+    private static class NewLAndValue {
+        public int l;
+        public Object field;
+
+        public NewLAndValue(int l, Object field) {
+            this.l = l;
+            this.field = field;
+        }
+    }
+
     public static String parse(Object val) throws NoSuchFieldException, IllegalAccessException, IOException {
         if (val == null) return "null";
         String ans = "{";
@@ -144,6 +157,73 @@ public class MyJSONParser {
                     sb.append(ch);
             }
         }
+    }
+    /** Парсит простейший json в Map */
+    public static Map parse(String jsonStr) {
+        StringBuffer jsonSB = new StringBuffer(jsonStr);
+        return parse(jsonSB, 1, jsonSB.length() - 1);
+    }
+
+    private static Map parse(StringBuffer jsonSB, int l, int r) {
+        Map<Object, Object> ans = new LinkedHashMap<>();
+        NewLAndValue lAndField;
+        NewLAndValue valueInField;
+        do {
+            switch (jsonSB.charAt(l)) {
+                case '"':
+                    lAndField = readField(jsonSB, ++l, r);
+                    l = lAndField.l;
+                    valueInField = valueInField(jsonSB, l, r);
+                    l = valueInField.l;
+                    ans.put(lAndField.field, valueInField.field);
+                    break;
+            }
+        } while (l < r);
+        return ans;
+    }
+
+    private static NewLAndValue valueInField(StringBuffer jsonSB, int l, int r) {
+        NewLAndValue lAndField = new NewLAndValue(l, null);
+        do {
+            switch (jsonSB.charAt(l)) {
+                case '"':
+                    lAndField = readField(jsonSB, ++l, r);
+                    return lAndField;
+                case 'n':
+                    System.out.println(jsonSB.substring(l, l + 4));
+                    if ("null".equals(jsonSB.substring(l, l + 4))
+                            && (jsonSB.charAt(l + 4) == '}'
+                            || jsonSB.charAt(l + 4) == ',')) {
+                        return new NewLAndValue(l + 5, jsonSB.substring(l, l + 4));
+                    }
+                default:
+                    if (jsonSB.charAt(l) <= '9' && jsonSB.charAt(l) >= '0') {
+                        l = jsonSB.indexOf(",", l);
+                        if (l == -1)
+                            l = jsonSB.indexOf("}", lAndField.l);
+
+                        lAndField.field = jsonSB.substring(lAndField.l, l);
+                        lAndField.l = l + 1;
+                        return lAndField;
+
+                    }
+            }
+            l++;
+        } while (l < r);
+        return lAndField;
+    }
+
+    private static NewLAndValue readField(StringBuffer jsonSB, int l, int r) {
+        int startL = l;
+        do {
+            if (jsonSB.substring(l, l + 2).equals("\":")
+                    || jsonSB.substring(l, l + 2).equals("\",")
+                    || jsonSB.substring(l, l + 2).equals("\"}")) {
+                return new NewLAndValue(l + 2, jsonSB.substring(startL, l));
+            }
+            l++;
+        } while (l < r);
+        throw new RuntimeException("Error in reading new field!");
     }
 
 }
