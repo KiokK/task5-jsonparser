@@ -29,7 +29,7 @@ class MyJSONParserTest {
 
         Home home = new Home(1, "2", new Flat("123"));
         DifferentTest differentValues = new DifferentTest(1, "2", new Flat("123"));
-        CoordinateTest coordinateTestValue = new CoordinateTest();
+        ArraysTest coordinateTestValue = new ArraysTest();
         Double doub = null;
         PersonTest personTest = null;
         PersonTest personTest2 = new PersonTest("Andrey");

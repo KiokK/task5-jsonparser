@@ -1,7 +1,6 @@
 package by.kihtenkoolga.json.simple;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -9,6 +8,7 @@ public class MyJSONParser {
 
     /**
      * Возвращает новую позицию, с которой продолжится поиск и объект
+     * Для парсинга из json в объект
      */
     private static class NewLAndValue {
         public int l;
@@ -22,18 +22,20 @@ public class MyJSONParser {
 
     public static String parse(Object val) throws NoSuchFieldException, IllegalAccessException, IOException {
         if (val == null) return "null";
-        String ans = "{";
+        if (val.getClass().isPrimitive())
+            return val.toString();
+        StringBuffer ans = new StringBuffer("{");
         Class<?> cls = val.getClass();
         Field[] fields = cls.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
-            ans += "\"" + fields[i].getName() + "\":";
+            ans.append("\"").append(fields[i].getName()).append("\":");
             fields[i].setAccessible(true);
-            ans += writeJSONString(fields[i].get(val));
+            ans.append(writeJSONString(fields[i].get(val)));
             if (fields.length > i + 1)
-                ans += ",";
+                ans.append(",");
         }
-        ans += "}";
-        return ans;
+        ans.append("}");
+        return String.valueOf(ans);
     }
 
     public static String writeJSONString(Object value) throws IOException, NoSuchFieldException, IllegalAccessException {
@@ -46,73 +48,17 @@ public class MyJSONParser {
         if (value instanceof Character)
             return '\"' + value.toString() + '\"';
 
-        if (value instanceof Double)
-            if (((Double) value).isInfinite() || ((Double) value).isNaN())
-                return "null";
-            else
-                return value.toString();
-
-
-        if (value instanceof Float)
-            if (((Float) value).isInfinite() || ((Float) value).isNaN())
-                return "null";
-            else
-                return value.toString();
-
         if (value instanceof Number || value instanceof Boolean)
             return value.toString();
 
         if (value instanceof Map)
-            return JSONObject.toJSONString((Map) value);
+            return JSONMap.toJSONString((Map) value);
 
         if (value instanceof Collection)
             return JSONArray.toJSONString((Collection) value);
 
-        if (value instanceof byte[])
-            return JSONArray.<Byte>toJSONString(Arrays.stream((int[]) value)
-                    .boxed().toArray(Byte[]::new));
-
-        if (value instanceof short[])
-            return JSONArray.<Short>toJSONString(Arrays.stream((int[]) value)
-                    .boxed().toArray(Short[]::new));
-
-        if (value instanceof int[])
-            return JSONArray.<Integer>toJSONString(Arrays.stream((int[]) value)
-                    .boxed().toArray(Integer[]::new));
-
-        if (value instanceof long[])
-            return JSONArray.<Long>toJSONString(Arrays.stream((long[]) value)
-                    .boxed().toArray(Long[]::new));
-
-        if (value instanceof float[])
-            return JSONArray.<Float>toJSONString(Arrays.stream((double[]) value)
-                    .boxed().toArray(Float[]::new));
-
-        if (value instanceof double[])
-            return JSONArray.<Double>toJSONString(Arrays.stream((double[]) value)
-                    .boxed().toArray(Double[]::new));
-
-        if (value instanceof boolean[])
-            return JSONArray.toJSONString((boolean[]) value);
-
-
-        if (value instanceof char[])
-            return JSONArray.<Character>toJSONString(Arrays.stream((int[]) value)
-                    .boxed().toArray(Character[]::new));
-
-        //Для парсинга любых массивов: [], [][], [][][]...
-        if (value.getClass().isArray()) {
-            String ans = "[";
-            ans += writeJSONString(Array.get(value, 0));
-            for (int i = 1; i < Array.getLength(value); i++) {
-                ans += "," + writeJSONString(Array.get(value, i));
-            }
-            return ans + "]";
-        }
-
-        if (value instanceof Object[]) {
-            return JSONArray.objectArrayToJSONString((Object[]) value);
-        }
+        if (value.getClass().isArray())
+            return JSONArray.toJSONString(value);
 
         if (value instanceof Object)
             return parse(value);

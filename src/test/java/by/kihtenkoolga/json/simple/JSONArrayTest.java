@@ -3,7 +3,7 @@ package by.kihtenkoolga.json.simple;
 import by.kihtenkoolga.utill.Flat;
 import by.kihtenkoolga.utill.Home;
 import by.kihtenkoolga.utill.CollectionsTest;
-import by.kihtenkoolga.utill.CoordinateTest;
+import by.kihtenkoolga.utill.ArraysTest;
 import by.kihtenkoolga.utill.DifferentTest;
 import by.kihtenkoolga.utill.PersonTest;
 import com.google.gson.Gson;
@@ -49,8 +49,8 @@ class JSONArrayTest {
 
     @ParameterizedTest
     @MethodSource("argsProviderForObjectArr")
-    void objectArrayToJSONString(Object[] argument, String expected) {
-        assertThat(JSONArray.objectArrayToJSONString(argument))
+    void objectArrayToJSONString(Object argument, String expected) {
+        assertThat(JSONArray.toJSONString(argument))
                 .isEqualTo(expected);
     }
 
@@ -59,7 +59,7 @@ class JSONArrayTest {
         Flat[] arrFlats = new Flat[]{new Flat("fA1"), new Flat("fA2"), null};
         Home[] homeArr = new Home[]{new Home(1, "2", new Flat("123"))};
         DifferentTest[] homeTesrArr = new DifferentTest[]{new DifferentTest(1, "2", new Flat("123"))};
-        CoordinateTest[] coordinateTests = new CoordinateTest[]{new CoordinateTest()};
+        ArraysTest[] coordinateTests = new ArraysTest[]{new ArraysTest()};
         PersonTest[] personTests = new PersonTest[]{new PersonTest()};
         CollectionsTest[] collectionsTests = new CollectionsTest[]{new CollectionsTest()};
         String[] emptyArr = new String[]{};

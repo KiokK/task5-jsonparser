@@ -16,12 +16,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class JSONObjectTest {
+class JSONMapTest {
 
     @ParameterizedTest
     @MethodSource("argsForMapTests")
     void toJSONString(Map argument, String expected) {
-        assertThat(JSONObject.toJSONString(argument))
+        assertThat(JSONMap.toJSONString(argument))
                 .isEqualTo(expected);
     }
     static Stream<Arguments> argsForMapTests() throws JsonProcessingException {

@@ -1,9 +1,8 @@
 package by.kihtenkoolga.json.simple;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JSONArray {
 
@@ -13,19 +12,19 @@ public class JSONArray {
         boolean first = true;
         Iterator iter = collection.iterator();
 
-        String ans = "[";
+        StringBuffer ans = new StringBuffer("[");
         while (iter.hasNext()) {
             if (first)
                 first = false;
             else
-                ans += ',';
+                ans.append(',');
 
             Object value = iter.next();
             if (value.equals(null))
-                ans += "null";
+                ans.append("null");
             else {
                 try {
-                    ans += MyJSONParser.writeJSONString((Object) value);
+                    ans.append(MyJSONParser.writeJSONString(value));
                 } catch (NoSuchFieldException e) {
                     throw new RuntimeException(e);
                 } catch (IllegalAccessException e) {
@@ -35,66 +34,28 @@ public class JSONArray {
                 }
             }
         }
-        ans += ']';
-        return ans;
+        ans.append(']');
+        return String.valueOf(ans);
     }
 
 
-    public static String toJSONString(boolean[] array) {
-        if (array == null) return "null";
-        if (array.length == 0)
-            return "[]";
-        String ans = "[";
-        ans += String.valueOf(array[0]);
-        for (int i = 1; i < array.length; i++)
-            ans += ',' + String.valueOf(array[i]);
-
-        ans += "]";
-        return ans;
-    }
-
-
-    public static <T> String toJSONString(T[] array) {
-        if (array == null)
+    public static String toJSONString(Object array)  {
+        if (array == null || array.toString().equals("null"))
             return "null";
-        if (array.length == 0)
-            return "[]";
-        String ans = "[";
-        String simb = "";
-        if (array[0] instanceof Character || array[0] instanceof String)
-            simb = "\"";
-
-        final String strPart = simb;
-        ans += Stream.of(array)
-                .map(o -> (o == null) ? null : strPart + o.toString() + strPart)
-                .collect(Collectors.joining(","));
-
-        ans += "]";
-        return ans;
-    }
-
-
-    public static String objectArrayToJSONString(Object[] array) {
-        if (array == null)
-            return "null";
-        if (array.length == 0)
-            return "[]";
-        String ans = "[";
-        ans += Stream.of(array)
-                .map(o -> {
-                    try {
-                        return (o == null) ? null : MyJSONParser.parse(o);
-                    } catch (NoSuchFieldException e) {
-                        throw new RuntimeException(e);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.joining(","));
-
-        ans += "]";
-        return ans;
+        if (Array.getLength(array) == 0) return "[]";
+        StringBuffer ans = new StringBuffer("[");
+        try {
+            ans.append(MyJSONParser.writeJSONString(Array.get(array, 0)));
+            for (int i = 1; i < Array.getLength(array); i++)
+                ans.append("," + MyJSONParser.writeJSONString(Array.get(array, i)));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        ans.append("]");
+        return String.valueOf(ans);
     }
 }

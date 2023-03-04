@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-public class JSONObject {
+public class JSONMap {
     public static String toJSONString(Map map) {
         if (map == null)
             return "null";
@@ -12,24 +12,24 @@ public class JSONObject {
         boolean first = true;
         Iterator iter = map.entrySet().iterator();
 
-        String ans = "{";
+        StringBuffer ans = new StringBuffer("{");
         while (iter.hasNext()) {
             if (first)
                 first = false;
             else
-                ans += ',';
+                ans.append(',');
             Map.Entry entry = (Map.Entry) iter.next();
 
             if (entry.getKey() == null)
-                ans += "null";
+                ans.append("null");
             else
-                ans += '\"' + MyJSONParser.escape(String.valueOf(entry.getKey())) + '\"';
-            ans += ':';
+                ans.append('\"').append(MyJSONParser.escape(String.valueOf(entry.getKey()))).append('\"');
+            ans.append(':');
             try {
                 if (entry.getValue() == null)
-                    ans += "null";
+                    ans.append("null");
                 else
-                    ans += MyJSONParser.writeJSONString(entry.getValue());
+                    ans.append(MyJSONParser.writeJSONString(entry.getValue()));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (NoSuchFieldException e) {
@@ -38,7 +38,8 @@ public class JSONObject {
                 throw new RuntimeException(e);
             }
         }
-        return ans + '}';
+        ans.append('}');
+        return String.valueOf(ans);
     }
 
 }
